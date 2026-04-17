@@ -130,7 +130,7 @@ def render_sidebar():
 
         st.divider()
 
-        st.caption("Powered by Gemini 1.5 Flash")
+        st.caption("Powered by Groq (Llama 3.3 70B)")
 
 
 def render_error(error_message: str):

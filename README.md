@@ -5,7 +5,7 @@ Multi-Tone AI Rephrasing Application - Transform your text into multiple communi
 ## Features
 
 - **Single Input, Multi-Output**: Generate 4 tone variations from one input
-- **Fast & Efficient**: Powered by Gemini 1.5 Flash for sub-2-second responses
+- **Blazing Fast**: Powered by Groq (Llama 3.3 70B) for ultra-fast responses
 - **Structured Output**: Reliable JSON-based responses
 - **Clean UI**: 2x2 grid comparison layout
 - **Easy Copy**: One-click copy to clipboard
@@ -35,7 +35,7 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. Set up your Gemini API key:
+4. Set up your Groq API key:
 
    **Option 1: Using .env file**
    ```bash
@@ -46,15 +46,16 @@ pip install -r requirements.txt
    **Option 2: Using Streamlit secrets**
    ```bash
    mkdir -p .streamlit
-   echo 'GEMINI_API_KEY = "your_key_here"' > .streamlit/secrets.toml
+   echo 'GROQ_API_KEY = "your_key_here"' > .streamlit/secrets.toml
    ```
 
-## Getting a Gemini API Key
+## Getting a Groq API Key
 
-1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Sign in with your Google account
-3. Click "Create API Key"
-4. Copy the key and add it to your `.env` or `.streamlit/secrets.toml`
+1. Visit [Groq Console](https://console.groq.com/)
+2. Sign up or sign in
+3. Navigate to API Keys section
+4. Click "Create API Key"
+5. Copy the key and add it to your `.env` or `.streamlit/secrets.toml`
 
 ## Usage
 
@@ -90,7 +91,7 @@ toneturner/
 ## Development Roadmap
 
 ### Phase 1: MVP ✅
-- [x] Gemini API integration
+- [x] Groq API integration
 - [x] JSON parsing
 - [x] 2x2 grid layout
 - [x] Basic UI components
@@ -110,7 +111,7 @@ toneturner/
 ## Technology Stack
 
 - **Frontend**: Streamlit
-- **AI Model**: Google Gemini 1.5 Flash
+- **AI Model**: Groq (Llama 3.3 70B Versatile)
 - **Language**: Python 3.8+
 - **Deployment**: Streamlit Cloud / Vercel
 

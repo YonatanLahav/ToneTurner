@@ -1,5 +1,5 @@
 import streamlit as st
-from src.services.gemini_service import GeminiService
+from src.services.groq_service import GroqService
 from src.components.ui_components import (
     render_header,
     render_input_section,
@@ -22,8 +22,8 @@ def main():
     # Initialize session state
     if "results" not in st.session_state:
         st.session_state.results = None
-    if "gemini_service" not in st.session_state:
-        st.session_state.gemini_service = None
+    if "ai_service" not in st.session_state:
+        st.session_state.ai_service = None
 
     # Render UI
     render_sidebar()
@@ -47,14 +47,14 @@ def main():
             render_error("Please enter some text to rephrase.")
         else:
             try:
-                # Initialize Gemini service
-                if st.session_state.gemini_service is None:
-                    with st.spinner("Initializing Gemini service..."):
-                        st.session_state.gemini_service = GeminiService()
+                # Initialize Groq service
+                if st.session_state.ai_service is None:
+                    with st.spinner("Initializing Groq service..."):
+                        st.session_state.ai_service = GroqService()
 
                 # Call API
                 with st.spinner("Rephrasing your text... ✍️"):
-                    results = st.session_state.gemini_service.rephrase_text(
+                    results = st.session_state.ai_service.rephrase_text(
                         user_input=user_input,
                         custom_instructions=custom_instructions
                     )
@@ -62,7 +62,7 @@ def main():
 
             except ValueError as e:
                 render_error(str(e))
-                st.info("💡 Add your Gemini API key in `.streamlit/secrets.toml` or set the `GEMINI_API_KEY` environment variable.")
+                st.info("💡 Add your Groq API key in `.streamlit/secrets.toml` or set the `GROQ_API_KEY` environment variable.")
             except Exception as e:
                 render_error(f"Failed to rephrase text: {str(e)}")
 
