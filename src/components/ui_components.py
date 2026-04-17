@@ -7,7 +7,7 @@ def render_header():
     st.title("🎭 ToneTurner")
     st.markdown(
         "Transform your text into multiple tones instantly. "
-        "Enter your text below and get Professional, Friendly, Direct, and Creative variations."
+        "Supports **Hebrew → English** translation with automatic rephrasing in Professional, Friendly, Direct, and Creative styles."
     )
     st.divider()
 
@@ -19,11 +19,11 @@ def render_input_section() -> tuple[str, Optional[str]]:
         Tuple of (user_input, custom_instructions)
     """
     user_input = st.text_area(
-        "Enter your text:",
+        "Enter your text (English or Hebrew):",
         height=150,
-        placeholder="Type or paste the text you want to rephrase...",
+        placeholder="Type or paste text in English or Hebrew... / הקלד או הדבק טקסט באנגלית או בעברית",
         max_chars=2000,
-        help="Maximum 2000 characters"
+        help="Maximum 2000 characters. Hebrew text will be automatically translated to English."
     )
 
     with st.expander("⚙️ Advanced Options"):
@@ -37,12 +37,34 @@ def render_input_section() -> tuple[str, Optional[str]]:
     return user_input, None
 
 
+def render_translation(results: Dict[str, str]):
+    """Render translation section if Hebrew was detected.
+
+    Args:
+        results: Dictionary that may contain translation data.
+    """
+    if results.get("_source_language") == "hebrew" and "translation" in results:
+        st.info("🌐 Hebrew detected — translated to English automatically")
+        with st.expander("📖 View English Translation", expanded=True):
+            st.markdown(f"**English Translation:**")
+            st.text_area(
+                label="translation_output",
+                value=results["translation"],
+                height=100,
+                disabled=True,
+                label_visibility="collapsed"
+            )
+        st.divider()
+
+
 def render_results_grid(results: Dict[str, str]):
     """Render results in a 2x2 grid layout.
 
     Args:
         results: Dictionary with tone keys and rephrased text values.
     """
+    render_translation(results)
+
     st.subheader("Results")
 
     # Define tone styling
@@ -121,10 +143,13 @@ def render_sidebar():
         st.subheader("How to Use")
         st.markdown(
             """
-            1. Enter or paste your text
+            1. Enter or paste your text (English or Hebrew)
             2. (Optional) Add custom instructions
             3. Click **Rephrase**
             4. Compare and copy your preferred version
+
+            **Hebrew Support:** Hebrew text is automatically
+            translated to English, then rephrased in 4 tones.
             """
         )
 
