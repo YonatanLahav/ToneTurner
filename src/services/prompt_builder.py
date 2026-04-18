@@ -46,7 +46,9 @@ class PromptBuilder:
         return f"""Rephrase the following text into four distinct styles:
 {_TONE_DEFINITIONS}
 
-Text: "{text}"
+<user_input>
+{text}
+</user_input>
 
 Output length: {length}
 {extra}
@@ -61,7 +63,9 @@ Respond with ONLY the JSON object, no other text."""
 then rephrase the translation into four distinct styles:
 {_TONE_DEFINITIONS}
 
-Hebrew Text: "{text}"
+<user_input>
+{text}
+</user_input>
 
 Output length: {length}
 {extra}

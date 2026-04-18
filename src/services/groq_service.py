@@ -2,6 +2,8 @@ import json
 import re
 from typing import Optional
 
+_CODE_FENCE_RE = re.compile(r'```(?:json)?\s*([\s\S]*?)```', re.IGNORECASE)
+
 from groq import Groq
 
 from src.config.settings import settings
@@ -40,6 +42,9 @@ class GroqService(BaseLLM):
             response_format={"type": "json_object"},
         )
 
+        if not response.choices:
+            raise ValueError("Groq returned an empty response (no choices). The input may have been blocked by a safety filter.")
+
         raw = response.choices[0].message.content.strip()
         data = self._parse(raw)
 
@@ -49,12 +54,10 @@ class GroqService(BaseLLM):
         )
 
     def _parse(self, raw: str) -> dict:
-        # Strip markdown code fences if present
-        if raw.startswith("```"):
-            raw = raw.split("```")[1]
-            if raw.startswith("json"):
-                raw = raw[4:]
-            raw = raw.strip()
+        # Extract content from code fence if present
+        match = _CODE_FENCE_RE.search(raw)
+        if match:
+            raw = match.group(1).strip()
 
         try:
             data = json.loads(raw)

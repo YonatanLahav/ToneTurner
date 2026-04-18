@@ -17,7 +17,7 @@ class AppSettings:
 
     # API settings
     groq_model: str = "llama-3.3-70b-versatile"
-    max_tokens: int = 1024
+    max_tokens: int = 4096
     temperature: float = 0.7
 
     # UI settings

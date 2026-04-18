@@ -18,7 +18,7 @@ def render_sidebar(dark_mode: bool, history_repo: HistoryRepository) -> bool:
         else:
             for i, entry in enumerate(history):
                 with st.expander(f"{entry.timestamp} — {entry.preview}", expanded=False):
-                    if st.button("↩️ Restore", key=f"restore_{i}", use_container_width=True):
+                    if st.button("↩️ Restore", key=f"restore_{entry.timestamp}", use_container_width=True):
                         st.session_state.results = entry.result
                         st.rerun()
 

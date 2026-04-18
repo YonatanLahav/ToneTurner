@@ -7,8 +7,9 @@ from src.services.groq_service import GroqService
 
 
 def _get_service() -> GroqService:
-    if "ai_service" not in st.session_state:
-        st.session_state.ai_service = GroqService()
+    if "ai_service" not in st.session_state or st.session_state.ai_service is None:
+        service = GroqService()          # raises ValueError on bad key — not cached
+        st.session_state.ai_service = service
     return st.session_state.ai_service
 
 
@@ -48,6 +49,7 @@ def main():
                 history_repo.add(request.text, result)
 
             except ValueError as e:
+                st.session_state.ai_service = None  # allow retry after key is fixed
                 render_error(str(e))
                 st.info(
                     "💡 Add your Groq API key in `.streamlit/secrets.toml` "

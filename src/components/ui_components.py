@@ -105,7 +105,8 @@ def _copy_button(text: str, key: str):
     hover_bg  = "#3a3a4f" if dark else "#f0f2f6"
     iframe_bg = "#0e1117" if dark else "#ffffff"
 
-    safe = text.replace("\\", "\\\\").replace("`", "\\`").replace("$", "\\$")
+    import json as _json
+    safe = _json.dumps(text)  # produces a properly quoted, escaped JS string literal
     components.html(f"""
         <style>
             body {{ margin: 0; padding: 0; background: {iframe_bg}; }}
@@ -125,7 +126,7 @@ def _copy_button(text: str, key: str):
             button:hover {{ background-color: {hover_bg}; border-color: #7c3aed; }}
         </style>
         <button id="btn_{key}" onclick="
-            navigator.clipboard.writeText(`{safe}`).then(() => {{
+            navigator.clipboard.writeText({safe}).then(() => {{
                 var btn = document.getElementById('btn_{key}');
                 btn.innerText = '✅ Copied!';
                 btn.style.backgroundColor = '#22c55e';
