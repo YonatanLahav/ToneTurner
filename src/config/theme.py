@@ -84,7 +84,13 @@ def build_css(p: ColorPalette) -> str:
         background-color: {p.sidebar_bg} !important;
         border-color: {p.border} !important;
     }}
-    [data-testid="stExpander"] summary          {{ color: {p.text} !important; }}
+    [data-testid="stExpander"] summary,
+    [data-testid="stExpander"] summary *,
+    [data-testid="stExpander"] summary p,
+    [data-testid="stExpander"] summary span,
+    [data-testid="stExpander"] summary div,
+    .streamlit-expanderHeader,
+    .streamlit-expanderHeader *                 {{ color: {p.text} !important; }}
 
     [data-testid="stAlert"]                     {{ background-color: {p.alert_bg} !important; }}
     .stCode, code, pre                          {{
