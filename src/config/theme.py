@@ -80,17 +80,21 @@ def build_css(p: ColorPalette) -> str:
         border-color: {p.btn_hover_border} !important;
     }}
 
-    [data-testid="stExpander"]                  {{
+    [data-testid="stExpander"],
+    [data-testid="stExpander"] > details,
+    [data-testid="stExpander"] > details > summary  {{
         background-color: {p.sidebar_bg} !important;
         border-color: {p.border} !important;
     }}
-    [data-testid="stExpander"] summary,
-    [data-testid="stExpander"] summary *,
-    [data-testid="stExpander"] summary p,
-    [data-testid="stExpander"] summary span,
-    [data-testid="stExpander"] summary div,
+    [data-testid="stExpander"] > details > summary,
+    [data-testid="stExpander"] > details > summary *,
+    [data-testid="stExpander"] > details > summary p,
+    [data-testid="stExpander"] > details > summary span,
+    [data-testid="stExpander"] > details > summary svg,
+    [data-testid="stExpander"] > details > summary svg *,
     .streamlit-expanderHeader,
-    .streamlit-expanderHeader *                 {{ color: {p.text} !important; }}
+    .streamlit-expanderHeader *                     {{ color: {p.text} !important;
+                                                       fill: {p.text} !important; }}
 
     [data-testid="stAlert"]                     {{ background-color: {p.alert_bg} !important; }}
     .stCode, code, pre                          {{
