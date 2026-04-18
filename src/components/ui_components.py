@@ -1,6 +1,7 @@
 import streamlit as st
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
+from src.config.theme import DARK, LIGHT, build_css
 
 
 def render_header():
@@ -180,88 +181,9 @@ def render_sidebar(dark_mode: bool = False, history: Optional[List[Dict]] = None
     return dark_mode
 
 
-_DARK_CSS = """
-<style>
-    /* ── Backgrounds ── */
-    .stApp                                          { background-color: #0e1117 !important; }
-    [data-testid="stSidebar"]                       { background-color: #1a1c26 !important; }
-    [data-testid="stSidebar"] > div                 { background-color: #1a1c26 !important; }
-    .block-container                                { background-color: #0e1117 !important; }
-
-    /* ── Text ── */
-    html, body, .stApp, .stMarkdown,
-    p, li, span, label, div                         { color: #fafafa !important; }
-    h1, h2, h3, h4, h5, h6                         { color: #ffffff !important; }
-    [data-testid="stSidebar"] *                     { color: #fafafa !important; }
-    .stCaption, small                               { color: #aaaaaa !important; }
-
-    /* ── Inputs ── */
-    [data-testid="stTextArea"] textarea,
-    [data-testid="stTextInput"] input               {
-        background-color: #1e2130 !important;
-        color: #fafafa !important;
-        border-color: #4a4a5a !important;
-    }
-
-    /* ── Buttons ── */
-    .stButton > button                              {
-        background-color: #2a2a3a !important;
-        color: #fafafa !important;
-        border-color: #5a5a6a !important;
-    }
-    .stButton > button:hover                        {
-        background-color: #3a3a4f !important;
-        border-color: #7c3aed !important;
-    }
-
-    /* ── Expanders ── */
-    [data-testid="stExpander"]                      {
-        background-color: #1a1c26 !important;
-        border-color: #4a4a5a !important;
-    }
-    [data-testid="stExpander"] summary              { color: #fafafa !important; }
-    [data-testid="stExpander"] summary:hover        { color: #c4b5fd !important; }
-
-    /* ── Select slider ── */
-    [data-testid="stSlider"] > div > div            { background-color: #2a2a3a !important; }
-
-    /* ── Alerts / info boxes ── */
-    [data-testid="stAlert"]                         { background-color: #1e2130 !important; }
-
-    /* ── Code blocks ── */
-    .stCode, code, pre                              {
-        background-color: #1e2130 !important;
-        color: #fafafa !important;
-    }
-
-    /* ── Dividers ── */
-    hr                                              { border-color: #4a4a5a !important; }
-
-    /* ── Toggle widget ── */
-    [data-testid="stToggle"] span                   { color: #fafafa !important; }
-</style>
-"""
-
-_LIGHT_RESET_CSS = """
-<style>
-    .stApp, [data-testid="stSidebar"], .block-container,
-    [data-testid="stTextArea"] textarea,
-    [data-testid="stTextInput"] input,
-    .stButton > button,
-    [data-testid="stExpander"],
-    [data-testid="stAlert"],
-    .stCode, code, pre {
-        background-color: unset !important;
-        color: unset !important;
-        border-color: unset !important;
-    }
-</style>
-"""
-
-
 def apply_theme(dark_mode: bool):
-    """Apply dark or light theme. Light mode uses config.toml defaults."""
-    st.markdown(_DARK_CSS if dark_mode else _LIGHT_RESET_CSS, unsafe_allow_html=True)
+    """Apply dark or light theme using palette from src/config/theme.py."""
+    st.markdown(build_css(DARK if dark_mode else LIGHT), unsafe_allow_html=True)
 
 
 def render_error(error_message: str):

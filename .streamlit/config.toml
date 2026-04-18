@@ -1,4 +1,5 @@
 [theme]
+# These match LIGHT palette in src/config/theme.py
 base = "light"
 primaryColor = "#7c3aed"
 backgroundColor = "#ffffff"
