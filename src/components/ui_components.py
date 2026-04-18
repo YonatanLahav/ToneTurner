@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 from typing import Optional, Tuple
 
 from src.config.theme import DARK, LIGHT, build_css
@@ -88,9 +89,35 @@ def render_results(result: RephraseResult):
                 label_visibility="collapsed",
                 key=f"textarea_{key}",
             )
-            if st.button("📋 Copy", key=f"copy_{key}", use_container_width=True):
-                st.code(value, language=None)
-                st.success("Copied!", icon="✅")
+            _copy_button(value, key=f"copy_{key}")
+
+
+def _copy_button(text: str, key: str):
+    """Render a true one-click clipboard copy button using injected HTML/JS."""
+    safe = text.replace("\\", "\\\\").replace("`", "\\`").replace("$", "\\$")
+    components.html(f"""
+        <button onclick="
+            navigator.clipboard.writeText(`{safe}`).then(() => {{
+                this.innerText = '✅ Copied!';
+                this.style.backgroundColor = '#22c55e';
+                this.style.color = 'white';
+                setTimeout(() => {{
+                    this.innerText = '📋 Copy';
+                    this.style.backgroundColor = '';
+                    this.style.color = '';
+                }}, 2000);
+            }});
+        " style="
+            width: 100%;
+            padding: 6px 12px;
+            cursor: pointer;
+            border: 1px solid #d0d0d8;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: transparent;
+            transition: background-color 0.2s;
+        ">📋 Copy</button>
+    """, height=40)
 
 
 def render_error(message: str):
@@ -116,7 +143,5 @@ def _render_translation(result: RephraseResult):
             disabled=True,
             label_visibility="collapsed",
         )
-        if st.button("📋 Copy Translation", key="copy_translation"):
-            st.code(result.translation, language=None)
-            st.success("Copied!", icon="✅")
+        _copy_button(result.translation, key="copy_translation")
     st.divider()
