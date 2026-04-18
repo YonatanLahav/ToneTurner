@@ -1,0 +1,10 @@
+from dataclasses import dataclass
+from typing import Optional
+
+
+@dataclass
+class User:
+    id: str
+    email: str
+    name: Optional[str] = None
+    avatar_url: Optional[str] = None

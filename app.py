@@ -2,13 +2,14 @@ import streamlit as st
 
 from src.components.sidebar import render_sidebar
 from src.components.ui_components import apply_theme, render_error, render_header, render_input_section, render_results
-from src.repositories.history_repo import HistoryRepository
+from src.repositories.factory import create_history_repository
+from src.services.auth_service import AuthService
 from src.services.groq_service import GroqService
 
 
 def _get_service() -> GroqService:
     if "ai_service" not in st.session_state or st.session_state.ai_service is None:
-        service = GroqService()          # raises ValueError on bad key — not cached
+        service = GroqService()
         st.session_state.ai_service = service
     return st.session_state.ai_service
 
@@ -26,11 +27,15 @@ def main():
     if "results" not in st.session_state:
         st.session_state.results = None
 
-    history_repo = HistoryRepository()
+    auth = AuthService()
+    auth.handle_callback()
+
+    history_repo = create_history_repository(auth.current_user())
 
     st.session_state.dark_mode = render_sidebar(
         dark_mode=st.session_state.dark_mode,
         history_repo=history_repo,
+        auth=auth,
     )
     apply_theme(st.session_state.dark_mode)
 
@@ -49,7 +54,7 @@ def main():
                 history_repo.add(request.text, result)
 
             except ValueError as e:
-                st.session_state.ai_service = None  # allow retry after key is fixed
+                st.session_state.ai_service = None
                 render_error(str(e))
                 st.info(
                     "💡 Add your Groq API key in `.streamlit/secrets.toml` "

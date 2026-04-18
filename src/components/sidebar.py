@@ -1,13 +1,19 @@
 import streamlit as st
 
-from src.repositories.history_repo import HistoryRepository
+from src.components.auth_components import render_auth_section
+from src.repositories.base_history_repo import BaseHistoryRepository
+from src.services.auth_service import AuthService
 
 
-def render_sidebar(dark_mode: bool, history_repo: HistoryRepository) -> bool:
+def render_sidebar(dark_mode: bool, history_repo: BaseHistoryRepository, auth: AuthService) -> bool:
     """Render sidebar. Returns current dark_mode toggle state."""
     with st.sidebar:
         st.header("⚙️ Settings")
         dark_mode = st.toggle("🌙 Dark Mode", value=dark_mode)
+
+        st.divider()
+
+        render_auth_section(auth)
 
         st.divider()
 
@@ -18,7 +24,7 @@ def render_sidebar(dark_mode: bool, history_repo: HistoryRepository) -> bool:
         else:
             for i, entry in enumerate(history):
                 with st.expander(f"{entry.timestamp} — {entry.preview}", expanded=False):
-                    if st.button("↩️ Restore", key=f"restore_{entry.timestamp}", use_container_width=True):
+                    if st.button("↩️ Restore", key=f"restore_{i}_{entry.timestamp}", use_container_width=True):
                         st.session_state.results = entry.result
                         st.rerun()
 
