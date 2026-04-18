@@ -34,11 +34,23 @@ class GroqService:
         self.client = Groq(api_key=self.api_key)
         self.model = settings.groq_model
 
+    def _length_instruction(self, output_length: str) -> str:
+        """Convert slider label to prompt instruction."""
+        mapping = {
+            "Very Concise": "Keep each version very short — 1 sentence maximum.",
+            "Concise": "Keep each version brief — 1-2 sentences.",
+            "Balanced": "Keep each version moderate — 2-3 sentences.",
+            "Detailed": "Make each version thorough — 3-4 sentences.",
+            "Very Detailed": "Make each version comprehensive — 4-5 sentences with elaboration.",
+        }
+        return mapping.get(output_length, "Keep each version moderate — 2-3 sentences.")
+
     def _build_messages(
         self,
         user_input: str,
         custom_instructions: Optional[str] = None,
-        is_hebrew: bool = False
+        is_hebrew: bool = False,
+        output_length: str = "Balanced"
     ) -> list:
         """Build the chat messages for tone rephrasing.
 
@@ -50,6 +62,9 @@ class GroqService:
         Returns:
             List of message dictionaries.
         """
+        length_instruction = self._length_instruction(output_length)
+        extra = f"Additional instructions: {custom_instructions}" if custom_instructions else ""
+
         system_message = {
             "role": "system",
             "content": (
@@ -69,14 +84,11 @@ class GroqService:
 
 Hebrew Text: "{user_input}"
 
-Output MUST be a valid JSON object with these keys:
-- "translation": The direct English translation of the Hebrew text
-- "professional": Professional tone rephrasing (in English)
-- "friendly": Friendly tone rephrasing (in English)
-- "direct": Direct tone rephrasing (in English)
-- "creative": Creative tone rephrasing (in English)
+Output length: {length_instruction}
+{extra}
 
-{f"Additional instructions: {custom_instructions}" if custom_instructions else ""}
+Output MUST be a valid JSON object with these keys:
+"translation", "professional", "friendly", "direct", "creative".
 
 Respond with ONLY the JSON object, no other text."""
         else:
@@ -88,10 +100,11 @@ Respond with ONLY the JSON object, no other text."""
 
 Text: "{user_input}"
 
+Output length: {length_instruction}
+{extra}
+
 Output MUST be a valid JSON object with these keys:
 "professional", "friendly", "direct", "creative".
-
-{f"Additional instructions: {custom_instructions}" if custom_instructions else ""}
 
 Respond with ONLY the JSON object, no other text."""
 
@@ -102,7 +115,7 @@ Respond with ONLY the JSON object, no other text."""
 
         return [system_message, user_message]
 
-    def rephrase_text(self, user_input: str, custom_instructions: Optional[str] = None) -> Dict[str, str]:
+    def rephrase_text(self, user_input: str, custom_instructions: Optional[str] = None, output_length: str = "Balanced") -> Dict[str, str]:
         """Rephrase text into multiple tones. Auto-translates Hebrew to English.
 
         Args:
@@ -117,7 +130,7 @@ Respond with ONLY the JSON object, no other text."""
         """
         try:
             is_hebrew = detect_hebrew(user_input)
-            messages = self._build_messages(user_input, custom_instructions, is_hebrew)
+            messages = self._build_messages(user_input, custom_instructions, is_hebrew, output_length)
 
             response = self.client.chat.completions.create(
                 model=self.model,

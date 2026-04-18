@@ -5,13 +5,13 @@ from src.components.ui_components import (
     render_input_section,
     render_results_grid,
     render_sidebar,
-    render_error
+    render_error,
+    apply_dark_mode
 )
 
 
 def main():
     """Main application entry point."""
-    # Page configuration
     st.set_page_config(
         page_title="ToneTurner",
         page_icon="🎭",
@@ -24,15 +24,24 @@ def main():
         st.session_state.results = None
     if "ai_service" not in st.session_state:
         st.session_state.ai_service = None
+    if "dark_mode" not in st.session_state:
+        st.session_state.dark_mode = False
 
-    # Render UI
-    render_sidebar()
+    # Render sidebar and get dark mode toggle state
+    dark_mode = render_sidebar(dark_mode=st.session_state.dark_mode)
+    if dark_mode != st.session_state.dark_mode:
+        st.session_state.dark_mode = dark_mode
+        st.rerun()
+
+    if st.session_state.dark_mode:
+        apply_dark_mode()
+
     render_header()
 
     # Input section
-    user_input, custom_instructions = render_input_section()
+    user_input, custom_instructions, output_length = render_input_section()
 
-    # Rephrase button
+    # Action buttons
     col1, col2, col3 = st.columns([1, 1, 4])
     with col1:
         rephrase_clicked = st.button("🔄 Rephrase", type="primary", use_container_width=True)
@@ -47,16 +56,15 @@ def main():
             render_error("Please enter some text to rephrase.")
         else:
             try:
-                # Initialize Groq service
                 if st.session_state.ai_service is None:
                     with st.spinner("Initializing Groq service..."):
                         st.session_state.ai_service = GroqService()
 
-                # Call API
                 with st.spinner("Rephrasing your text... ✍️"):
                     results = st.session_state.ai_service.rephrase_text(
                         user_input=user_input,
-                        custom_instructions=custom_instructions
+                        custom_instructions=custom_instructions,
+                        output_length=output_length
                     )
                     st.session_state.results = results
 
