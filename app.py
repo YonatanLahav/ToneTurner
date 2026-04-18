@@ -2,7 +2,7 @@ import streamlit as st
 from src.services.groq_service import GroqService
 from src.components.ui_components import (
     add_to_history,
-    apply_dark_mode,
+    apply_theme,
     render_error,
     render_header,
     render_input_section,
@@ -36,8 +36,7 @@ def main():
         history=st.session_state.history
     )
 
-    if st.session_state.dark_mode:
-        apply_dark_mode()
+    apply_theme(st.session_state.dark_mode)
 
     render_header()
 

@@ -180,23 +180,21 @@ def render_sidebar(dark_mode: bool = False, history: Optional[List[Dict]] = None
     return dark_mode
 
 
-def apply_dark_mode():
-    """Inject CSS for dark mode styling."""
-    st.markdown("""
-        <style>
-            .stApp {
-                background-color: #0e1117;
-                color: #fafafa;
-            }
-            .stTextArea textarea {
-                background-color: #1e2130;
-                color: #fafafa;
-            }
-            .stExpander {
-                background-color: #1e2130;
-            }
-        </style>
-    """, unsafe_allow_html=True)
+def apply_theme(dark_mode: bool):
+    """Always inject theme CSS so toggling off properly resets to light mode."""
+    if dark_mode:
+        css = """
+            .stApp { background-color: #0e1117; color: #fafafa; }
+            .stTextArea textarea { background-color: #1e2130; color: #fafafa; }
+            .stExpander { background-color: #1e2130; }
+        """
+    else:
+        css = """
+            .stApp { background-color: #ffffff; color: #0e1117; }
+            .stTextArea textarea { background-color: #f0f2f6; color: #0e1117; }
+            .stExpander { background-color: #f0f2f6; }
+        """
+    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
 
 
 def render_error(error_message: str):
