@@ -28,11 +28,22 @@ def _render_login(auth: AuthService) -> None:
         st.markdown(f'<meta http-equiv="refresh" content="0; url={url}">', unsafe_allow_html=True)
         st.stop()
 
-    with st.expander("Or sign in with email"):
+    with st.expander("Or use email (no password needed)"):
+        st.caption("Works for both sign-up and sign-in — we'll email you a magic link.")
         email = st.text_input("Email address", key="magic_link_email")
         if st.button("Send magic link", use_container_width=True):
             if email:
-                auth.sign_in_with_magic_link(email)
-                st.success("Check your inbox for a login link.")
+                try:
+                    auth.sign_in_with_magic_link(email)
+                    st.session_state["magic_link_sent"] = True
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Failed to send link: {e}")
             else:
                 st.warning("Enter your email address.")
+
+    if st.session_state.get("magic_link_sent"):
+        st.success("✅ Magic link sent! Check your inbox and click the link to sign in.")
+        if st.button("Resend", use_container_width=True):
+            st.session_state.pop("magic_link_sent", None)
+            st.rerun()
