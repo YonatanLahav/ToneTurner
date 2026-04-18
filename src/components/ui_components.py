@@ -74,6 +74,10 @@ def render_results(result: RephraseResult):
         "creative":     ("✨", "Creative"),
     }
 
+    # Use a hash of the result content so keys change on every new rephrase,
+    # forcing Streamlit to re-render the text areas with fresh values.
+    result_hash = hash((result.professional, result.friendly, result.direct, result.creative))
+
     (col1, col2), (col3, col4) = st.columns(2), st.columns(2)
     for col, (key, (icon, title)) in zip(
         [col1, col2, col3, col4], tone_config.items()
@@ -87,9 +91,9 @@ def render_results(result: RephraseResult):
                 height=150,
                 disabled=True,
                 label_visibility="collapsed",
-                key=f"textarea_{key}",
+                key=f"textarea_{key}_{result_hash}",
             )
-            _copy_button(value, key=f"copy_{key}")
+            _copy_button(value, key=f"copy_{key}_{result_hash}")
 
 
 def _copy_button(text: str, key: str):
