@@ -64,10 +64,14 @@ def build_css(p: ColorPalette) -> str:
     .stCaption, small                           {{ color: {p.text_muted} !important; }}
 
     [data-testid="stTextArea"] textarea,
-    [data-testid="stTextInput"] input           {{
+    [data-testid="stTextArea"] textarea:disabled,
+    [data-testid="stTextInput"] input,
+    [data-testid="stTextInput"] input:disabled    {{
         background-color: {p.input_bg} !important;
         color: {p.text} !important;
         border-color: {p.border} !important;
+        -webkit-text-fill-color: {p.text} !important;
+        opacity: 1 !important;
     }}
 
     .stButton > button                          {{
