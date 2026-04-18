@@ -28,10 +28,7 @@ def main():
         st.session_state.dark_mode = False
 
     # Render sidebar and get dark mode toggle state
-    dark_mode = render_sidebar(dark_mode=st.session_state.dark_mode)
-    if dark_mode != st.session_state.dark_mode:
-        st.session_state.dark_mode = dark_mode
-        st.rerun()
+    st.session_state.dark_mode = render_sidebar(dark_mode=st.session_state.dark_mode)
 
     if st.session_state.dark_mode:
         apply_dark_mode()
@@ -72,7 +69,15 @@ def main():
                 render_error(str(e))
                 st.info("💡 Add your Groq API key in `.streamlit/secrets.toml` or set the `GROQ_API_KEY` environment variable.")
             except Exception as e:
-                render_error(f"Failed to rephrase text: {str(e)}")
+                error_msg = str(e).lower()
+                if "rate" in error_msg or "quota" in error_msg or "429" in error_msg:
+                    render_error("Rate limit reached. Please wait a moment and try again.")
+                elif "connection" in error_msg or "timeout" in error_msg or "network" in error_msg:
+                    render_error("Connection issue. Please check your internet and try again.")
+                elif "api key" in error_msg or "unauthorized" in error_msg or "401" in error_msg:
+                    render_error("Invalid API key. Please check your Groq API key.")
+                else:
+                    render_error(f"Failed to rephrase text: {str(e)}")
 
     # Display results
     if st.session_state.results:

@@ -2,21 +2,6 @@ import streamlit as st
 from typing import Dict, Optional, Tuple
 
 
-COPY_JS = """
-<script>
-function copyToClipboard(text, btnId) {
-    navigator.clipboard.writeText(text).then(function() {
-        var btn = document.getElementById(btnId);
-        if (btn) {
-            btn.innerText = '✅ Copied!';
-            setTimeout(function() { btn.innerText = '📋 Copy'; }, 2000);
-        }
-    });
-}
-</script>
-"""
-
-
 def render_header():
     """Render application header."""
     st.title("🎭 ToneTurner")
@@ -54,9 +39,8 @@ def render_input_section() -> Tuple[str, Optional[str], str]:
             placeholder="e.g., Use formal language, Avoid jargon, Add humor",
             help="Provide additional instructions to customize the output"
         )
-        return user_input, custom_instructions if custom_instructions else None, length_value
 
-    return user_input, None, length_value
+    return user_input, custom_instructions or None, length_value
 
 
 def render_translation(results: Dict[str, str]):

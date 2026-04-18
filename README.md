@@ -6,6 +6,10 @@ Multi-Tone AI Rephrasing Application - Transform your text into multiple communi
 
 - **Single Input, Multi-Output**: Generate 4 tone variations from one input
 - **Blazing Fast**: Powered by Groq (Llama 3.3 70B) for ultra-fast responses
+- **Hebrew → English**: Automatic Hebrew detection and translation
+- **Output Length Control**: 5-level slider from Very Concise to Very Detailed
+- **Custom Instructions**: Add your own style tweaks (formal, humorous, etc.)
+- **Dark Mode**: Toggle light/dark themes
 - **Structured Output**: Reliable JSON-based responses
 - **Clean UI**: 2x2 grid comparison layout
 - **Easy Copy**: One-click copy to clipboard
@@ -78,7 +82,7 @@ toneturner/
 │   │   └── settings.py         # Configuration settings
 │   ├── services/
 │   │   ├── __init__.py
-│   │   └── gemini_service.py   # Gemini API integration
+│   │   └── groq_service.py     # Groq API integration
 │   └── components/
 │       ├── __init__.py
 │       └── ui_components.py    # UI rendering components
@@ -96,17 +100,19 @@ toneturner/
 - [x] 2x2 grid layout
 - [x] Basic UI components
 
-### Phase 2: UX Enhancement
-- [ ] Copy to clipboard functionality
-- [ ] Custom tone field
-- [ ] Dark/light mode toggle
-- [ ] Output length slider
+### Phase 2: UX Enhancement ✅
+- [x] Copy to clipboard functionality
+- [x] Custom tone field
+- [x] Dark/light mode toggle
+- [x] Output length slider
+- [x] Hebrew → English auto-translation
 
 ### Phase 3: Advanced Features
-- [ ] Context-aware rephrasing (Email vs Slack)
+- [ ] Context-aware rephrasing (Email vs Slack vs LinkedIn)
+- [ ] Rephrase history panel
 - [ ] User authentication
-- [ ] Rephrase history
 - [ ] Database integration (Supabase)
+- [ ] Batch mode (CSV upload)
 
 ## Technology Stack
 
