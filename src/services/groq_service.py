@@ -1,164 +1,68 @@
 import json
 import re
-from typing import Dict, Optional
+from typing import Optional
+
 from groq import Groq
+
 from src.config.settings import settings
+from src.models.rephrase import RephraseRequest, RephraseResult
+from src.services.base_llm import BaseLLM
+from src.services.prompt_builder import PromptBuilder
+
+_HEBREW_RE = re.compile(r'[\u0590-\u05FF]')
 
 
-def detect_hebrew(text: str) -> bool:
-    """Detect if text contains Hebrew characters.
-
-    Args:
-        text: Input text to check.
-
-    Returns:
-        True if text contains Hebrew characters.
-    """
-    hebrew_pattern = re.compile(r'[\u0590-\u05FF]')
-    return bool(hebrew_pattern.search(text))
+def _is_hebrew(text: str) -> bool:
+    return bool(_HEBREW_RE.search(text))
 
 
-class GroqService:
-    """Service for interacting with Groq API."""
+class GroqService(BaseLLM):
+    """Groq implementation of BaseLLM."""
 
     def __init__(self, api_key: Optional[str] = None):
-        """Initialize Groq service with API key.
-
-        Args:
-            api_key: Groq API key. If None, fetches from settings.
-        """
-        self.api_key = api_key or settings.groq_api_key
-        if not self.api_key:
-            raise ValueError("Groq API key not found. Set GROQ_API_KEY in environment or Streamlit secrets.")
-
-        self.client = Groq(api_key=self.api_key)
-        self.model = settings.groq_model
-
-    def _length_instruction(self, output_length: str) -> str:
-        """Convert slider label to prompt instruction."""
-        mapping = {
-            "Very Concise": "Keep each version very short — 1 sentence maximum.",
-            "Concise": "Keep each version brief — 1-2 sentences.",
-            "Balanced": "Keep each version moderate — 2-3 sentences.",
-            "Detailed": "Make each version thorough — 3-4 sentences.",
-            "Very Detailed": "Make each version comprehensive — 4-5 sentences with elaboration.",
-        }
-        return mapping.get(output_length, "Keep each version moderate — 2-3 sentences.")
-
-    def _build_messages(
-        self,
-        user_input: str,
-        custom_instructions: Optional[str] = None,
-        is_hebrew: bool = False,
-        output_length: str = "Balanced"
-    ) -> list:
-        """Build the chat messages for tone rephrasing.
-
-        Args:
-            user_input: The text to rephrase.
-            custom_instructions: Optional custom tone instructions.
-            is_hebrew: Whether the input contains Hebrew text.
-
-        Returns:
-            List of message dictionaries.
-        """
-        length_instruction = self._length_instruction(output_length)
-        extra = f"Additional instructions: {custom_instructions}" if custom_instructions else ""
-
-        system_message = {
-            "role": "system",
-            "content": (
-                "You are an expert linguistic editor and translator. Your task is to process the user's "
-                "input and output ONLY a valid JSON object with no additional text, markdown formatting, "
-                "or code blocks."
+        key = api_key or settings.groq_api_key
+        if not key:
+            raise ValueError(
+                "Groq API key not found. Set GROQ_API_KEY in environment or Streamlit secrets."
             )
-        }
+        self._client = Groq(api_key=key)
+        self._prompt_builder = PromptBuilder()
 
-        if is_hebrew:
-            user_content = f"""The following text is in Hebrew. First translate it to natural, fluent English, then rephrase the English translation into four distinct styles:
+    def rephrase(self, request: RephraseRequest) -> RephraseResult:
+        is_hebrew = _is_hebrew(request.text)
+        messages = self._prompt_builder.build(request, is_hebrew)
 
-1. Professional: Clear, polite, and suitable for workplace communication.
-2. Friendly: Warm, approachable, and casual.
-3. Direct: Concise, no filler, straight to the point.
-4. Creative: Unique, engaging, and stylized.
+        response = self._client.chat.completions.create(
+            model=settings.groq_model,
+            messages=messages,
+            temperature=settings.temperature,
+            max_tokens=settings.max_tokens,
+            response_format={"type": "json_object"},
+        )
 
-Hebrew Text: "{user_input}"
+        raw = response.choices[0].message.content.strip()
+        data = self._parse(raw)
 
-Output length: {length_instruction}
-{extra}
+        return RephraseResult.from_dict(
+            data,
+            source_language="hebrew" if is_hebrew else "english",
+        )
 
-Output MUST be a valid JSON object with these keys:
-"translation", "professional", "friendly", "direct", "creative".
+    def _parse(self, raw: str) -> dict:
+        # Strip markdown code fences if present
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+            raw = raw.strip()
 
-Respond with ONLY the JSON object, no other text."""
-        else:
-            user_content = f"""Rephrase the following text into four distinct styles:
-1. Professional: Clear, polite, and suitable for workplace communication.
-2. Friendly: Warm, approachable, and casual.
-3. Direct: Concise, no filler, straight to the point.
-4. Creative: Unique, engaging, and stylized.
-
-Text: "{user_input}"
-
-Output length: {length_instruction}
-{extra}
-
-Output MUST be a valid JSON object with these keys:
-"professional", "friendly", "direct", "creative".
-
-Respond with ONLY the JSON object, no other text."""
-
-        user_message = {
-            "role": "user",
-            "content": user_content
-        }
-
-        return [system_message, user_message]
-
-    def rephrase_text(self, user_input: str, custom_instructions: Optional[str] = None, output_length: str = "Balanced") -> Dict[str, str]:
-        """Rephrase text into multiple tones. Auto-translates Hebrew to English.
-
-        Args:
-            user_input: The text to rephrase (English or Hebrew).
-            custom_instructions: Optional custom tone instructions.
-
-        Returns:
-            Dictionary with tone keys, rephrased text values, and optional translation.
-
-        Raises:
-            Exception: If API call fails or response is invalid.
-        """
         try:
-            is_hebrew = detect_hebrew(user_input)
-            messages = self._build_messages(user_input, custom_instructions, is_hebrew, output_length)
-
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=settings.temperature,
-                max_tokens=settings.max_tokens,
-                response_format={"type": "json_object"}
-            )
-
-            response_text = response.choices[0].message.content.strip()
-
-            if response_text.startswith("```"):
-                response_text = response_text.split("```")[1]
-                if response_text.startswith("json"):
-                    response_text = response_text[4:]
-                response_text = response_text.strip()
-
-            result = json.loads(response_text)
-
-            expected_keys = set(settings.default_tones)
-            if not expected_keys.issubset(result.keys()):
-                raise ValueError(f"Missing expected keys in response. Expected: {expected_keys}, Got: {set(result.keys())}")
-
-            result["_source_language"] = "hebrew" if is_hebrew else "english"
-
-            return result
-
+            data = json.loads(raw)
         except json.JSONDecodeError as e:
-            raise Exception(f"Failed to parse JSON response: {e}\nResponse: {response_text}")
-        except Exception as e:
-            raise Exception(f"Error calling Groq API: {str(e)}")
+            raise ValueError(f"Failed to parse JSON response: {e}\nResponse: {raw}")
+
+        missing = set(settings.default_tones) - data.keys()
+        if missing:
+            raise ValueError(f"Missing keys in API response: {missing}")
+
+        return data

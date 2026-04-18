@@ -74,22 +74,27 @@ The app will open in your browser at `http://localhost:8501`
 
 ```
 toneturner/
-├── app.py                      # Main Streamlit application
+├── app.py                          # Main entry point
 ├── src/
-│   ├── __init__.py
+│   ├── models/
+│   │   └── rephrase.py             # RephraseRequest / RephraseResult dataclasses
 │   ├── config/
-│   │   ├── __init__.py
-│   │   └── settings.py         # Configuration settings
+│   │   ├── settings.py             # App & API configuration
+│   │   └── theme.py                # Color palettes + CSS generator
 │   ├── services/
-│   │   ├── __init__.py
-│   │   └── groq_service.py     # Groq API integration
+│   │   ├── base_llm.py             # Strategy interface (abstract)
+│   │   ├── groq_service.py         # Groq implementation of BaseLLM
+│   │   └── prompt_builder.py       # Prompt construction logic
+│   ├── repositories/
+│   │   └── history_repo.py         # Rephrase history (session → DB-ready)
 │   └── components/
-│       ├── __init__.py
-│       └── ui_components.py    # UI rendering components
+│       ├── sidebar.py              # Sidebar rendering
+│       └── ui_components.py        # Main content rendering
+├── .streamlit/
+│   └── config.toml                 # Streamlit light theme defaults
 ├── requirements.txt
 ├── .env.example
-├── .gitignore
-└── README.md
+└── .gitignore
 ```
 
 ## Development Roadmap
