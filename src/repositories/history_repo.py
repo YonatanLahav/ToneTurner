@@ -29,4 +29,4 @@ class HistoryRepository:
         return self._load()
 
     def _load(self) -> list[HistoryEntry]:
-        return st.session_state.get(self._KEY, [])
+        return list(st.session_state.get(self._KEY, []))

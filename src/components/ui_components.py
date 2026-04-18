@@ -161,5 +161,5 @@ def _render_translation(result: RephraseResult):
             disabled=True,
             label_visibility="collapsed",
         )
-        _copy_button(result.translation, key="copy_translation")
+    _copy_button(result.translation, key="copy_translation")
     st.divider()
