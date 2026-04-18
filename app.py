@@ -1,12 +1,13 @@
 import streamlit as st
 from src.services.groq_service import GroqService
 from src.components.ui_components import (
+    add_to_history,
+    apply_dark_mode,
+    render_error,
     render_header,
     render_input_section,
     render_results_grid,
     render_sidebar,
-    render_error,
-    apply_dark_mode
 )
 
 
@@ -26,9 +27,14 @@ def main():
         st.session_state.ai_service = None
     if "dark_mode" not in st.session_state:
         st.session_state.dark_mode = False
+    if "history" not in st.session_state:
+        st.session_state.history = []
 
     # Render sidebar and get dark mode toggle state
-    st.session_state.dark_mode = render_sidebar(dark_mode=st.session_state.dark_mode)
+    st.session_state.dark_mode = render_sidebar(
+        dark_mode=st.session_state.dark_mode,
+        history=st.session_state.history
+    )
 
     if st.session_state.dark_mode:
         apply_dark_mode()
@@ -64,6 +70,9 @@ def main():
                         output_length=output_length
                     )
                     st.session_state.results = results
+                    st.session_state.history = add_to_history(
+                        user_input, results, st.session_state.history
+                    )
 
             except ValueError as e:
                 render_error(str(e))

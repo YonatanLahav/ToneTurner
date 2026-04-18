@@ -1,5 +1,6 @@
 import streamlit as st
-from typing import Dict, Optional, Tuple
+from datetime import datetime
+from typing import Dict, List, Optional, Tuple
 
 
 def render_header():
@@ -114,32 +115,48 @@ def render_results_grid(results: Dict[str, str]):
                 st.success("Copied!", icon="✅")
 
 
-def render_sidebar(dark_mode: bool = False) -> bool:
-    """Render sidebar with settings and information.
+def add_to_history(input_text: str, results: Dict[str, str], history: List[Dict]) -> List[Dict]:
+    """Add a rephrase result to history, keeping last 5 entries.
+
+    Args:
+        input_text: The original input text.
+        results: The rephrase results dict.
+        history: Current history list.
+
+    Returns:
+        Updated history list.
+    """
+    entry = {
+        "timestamp": datetime.now().strftime("%H:%M:%S"),
+        "input": input_text[:60] + ("..." if len(input_text) > 60 else ""),
+        "results": results,
+    }
+    return ([entry] + history)[:5]
+
+
+def render_sidebar(dark_mode: bool = False, history: Optional[List[Dict]] = None) -> bool:
+    """Render sidebar with settings, history, and information.
 
     Returns:
         dark_mode: Current dark mode toggle state.
     """
     with st.sidebar:
         st.header("⚙️ Settings")
-
         dark_mode = st.toggle("🌙 Dark Mode", value=dark_mode)
 
         st.divider()
 
-        st.subheader("About ToneTurner")
-        st.markdown(
-            """
-            **ToneTurner** helps you communicate better by providing multiple
-            tone variations of your text in seconds.
-
-            Perfect for:
-            - Email drafting
-            - Slack messages
-            - Social media posts
-            - Professional communications
-            """
-        )
+        # History section
+        st.subheader("🕓 Recent Rephrases")
+        if not history:
+            st.caption("No history yet. Rephrase some text to get started.")
+        else:
+            for i, entry in enumerate(history):
+                with st.expander(f"{entry['timestamp']} — {entry['input']}", expanded=False):
+                    st.caption("Click below to restore this result.")
+                    if st.button("↩️ Restore", key=f"restore_{i}", use_container_width=True):
+                        st.session_state.results = entry["results"]
+                        st.rerun()
 
         st.divider()
 
