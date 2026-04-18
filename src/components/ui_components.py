@@ -180,98 +180,88 @@ def render_sidebar(dark_mode: bool = False, history: Optional[List[Dict]] = None
     return dark_mode
 
 
+_DARK_CSS = """
+<style>
+    /* ── Backgrounds ── */
+    .stApp                                          { background-color: #0e1117 !important; }
+    [data-testid="stSidebar"]                       { background-color: #1a1c26 !important; }
+    [data-testid="stSidebar"] > div                 { background-color: #1a1c26 !important; }
+    .block-container                                { background-color: #0e1117 !important; }
+
+    /* ── Text ── */
+    html, body, .stApp, .stMarkdown,
+    p, li, span, label, div                         { color: #fafafa !important; }
+    h1, h2, h3, h4, h5, h6                         { color: #ffffff !important; }
+    [data-testid="stSidebar"] *                     { color: #fafafa !important; }
+    .stCaption, small                               { color: #aaaaaa !important; }
+
+    /* ── Inputs ── */
+    [data-testid="stTextArea"] textarea,
+    [data-testid="stTextInput"] input               {
+        background-color: #1e2130 !important;
+        color: #fafafa !important;
+        border-color: #4a4a5a !important;
+    }
+
+    /* ── Buttons ── */
+    .stButton > button                              {
+        background-color: #2a2a3a !important;
+        color: #fafafa !important;
+        border-color: #5a5a6a !important;
+    }
+    .stButton > button:hover                        {
+        background-color: #3a3a4f !important;
+        border-color: #7c3aed !important;
+    }
+
+    /* ── Expanders ── */
+    [data-testid="stExpander"]                      {
+        background-color: #1a1c26 !important;
+        border-color: #4a4a5a !important;
+    }
+    [data-testid="stExpander"] summary              { color: #fafafa !important; }
+    [data-testid="stExpander"] summary:hover        { color: #c4b5fd !important; }
+
+    /* ── Select slider ── */
+    [data-testid="stSlider"] > div > div            { background-color: #2a2a3a !important; }
+
+    /* ── Alerts / info boxes ── */
+    [data-testid="stAlert"]                         { background-color: #1e2130 !important; }
+
+    /* ── Code blocks ── */
+    .stCode, code, pre                              {
+        background-color: #1e2130 !important;
+        color: #fafafa !important;
+    }
+
+    /* ── Dividers ── */
+    hr                                              { border-color: #4a4a5a !important; }
+
+    /* ── Toggle widget ── */
+    [data-testid="stToggle"] span                   { color: #fafafa !important; }
+</style>
+"""
+
+_LIGHT_RESET_CSS = """
+<style>
+    .stApp, [data-testid="stSidebar"], .block-container,
+    [data-testid="stTextArea"] textarea,
+    [data-testid="stTextInput"] input,
+    .stButton > button,
+    [data-testid="stExpander"],
+    [data-testid="stAlert"],
+    .stCode, code, pre {
+        background-color: unset !important;
+        color: unset !important;
+        border-color: unset !important;
+    }
+</style>
+"""
+
+
 def apply_theme(dark_mode: bool):
-    """Inject comprehensive theme CSS covering all Streamlit elements."""
-    if dark_mode:
-        bg          = "#0e1117"
-        secondary   = "#262730"
-        text        = "#fafafa"
-        border      = "#4a4a5a"
-        btn_bg      = "#3a3a4a"
-        btn_text    = "#fafafa"
-        btn_border  = "#5a5a6a"
-        input_bg    = "#1e2130"
-    else:
-        bg          = "#ffffff"
-        secondary   = "#f0f2f6"
-        text        = "#31333f"
-        border      = "#d0d0d8"
-        btn_bg      = "#ffffff"
-        btn_text    = "#31333f"
-        btn_border  = "#d0d0d8"
-        input_bg    = "#ffffff"
-
-    st.markdown(f"""
-        <style>
-            /* Main app background */
-            .stApp, .stApp > header {{
-                background-color: {bg};
-                color: {text};
-            }}
-
-            /* Sidebar */
-            [data-testid="stSidebar"],
-            [data-testid="stSidebar"] > div {{
-                background-color: {secondary};
-                color: {text};
-            }}
-            [data-testid="stSidebar"] * {{
-                color: {text} !important;
-            }}
-
-            /* Text areas */
-            .stTextArea textarea,
-            [data-testid="stTextArea"] textarea {{
-                background-color: {input_bg} !important;
-                color: {text} !important;
-                border-color: {border} !important;
-            }}
-
-            /* Text input */
-            .stTextInput input,
-            [data-testid="stTextInput"] input {{
-                background-color: {input_bg} !important;
-                color: {text} !important;
-                border-color: {border} !important;
-            }}
-
-            /* Buttons */
-            .stButton > button {{
-                background-color: {btn_bg} !important;
-                color: {btn_text} !important;
-                border-color: {btn_border} !important;
-            }}
-
-            /* Expanders */
-            [data-testid="stExpander"],
-            .streamlit-expanderHeader {{
-                background-color: {secondary} !important;
-                color: {text} !important;
-                border-color: {border} !important;
-            }}
-            [data-testid="stExpander"] summary {{
-                color: {text} !important;
-            }}
-
-            /* Dividers */
-            hr {{ border-color: {border}; }}
-
-            /* General text */
-            p, h1, h2, h3, h4, h5, h6, label, span, div {{
-                color: {text};
-            }}
-
-            /* Select slider */
-            [data-testid="stSlider"] * {{
-                color: {text} !important;
-            }}
-
-            /* Info / success / error boxes */
-            [data-testid="stAlert"] {{
-                background-color: {secondary} !important;
-            }}
-        </style>
-    """, unsafe_allow_html=True)
+    """Apply dark or light theme. Light mode uses config.toml defaults."""
+    st.markdown(_DARK_CSS if dark_mode else _LIGHT_RESET_CSS, unsafe_allow_html=True)
 
 
 def render_error(error_message: str):
