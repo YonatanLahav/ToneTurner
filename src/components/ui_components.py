@@ -93,31 +93,49 @@ def render_results(result: RephraseResult):
 
 
 def _copy_button(text: str, key: str):
-    """Render a true one-click clipboard copy button using injected HTML/JS."""
+    """Render a one-click clipboard copy button styled to match Streamlit's native buttons."""
+    dark = st.session_state.get("dark_mode", False)
+    bg        = "#2a2a3a" if dark else "#ffffff"
+    color     = "#fafafa" if dark else "#31333f"
+    border    = "#4a4a5a" if dark else "#d0d0d8"
+    hover_bg  = "#3a3a4f" if dark else "#f0f2f6"
+    iframe_bg = "#0e1117" if dark else "#ffffff"
+
     safe = text.replace("\\", "\\\\").replace("`", "\\`").replace("$", "\\$")
     components.html(f"""
-        <button onclick="
+        <style>
+            body {{ margin: 0; padding: 0; background: {iframe_bg}; }}
+            button {{
+                width: 100%;
+                height: 38px;
+                background-color: {bg};
+                color: {color};
+                border: 1px solid {border};
+                border-radius: 6px;
+                font-size: 14px;
+                font-family: "Source Sans Pro", sans-serif;
+                font-weight: 400;
+                cursor: pointer;
+                transition: background-color 0.15s, border-color 0.15s;
+            }}
+            button:hover {{ background-color: {hover_bg}; border-color: #7c3aed; }}
+        </style>
+        <button id="btn_{key}" onclick="
             navigator.clipboard.writeText(`{safe}`).then(() => {{
-                this.innerText = '✅ Copied!';
-                this.style.backgroundColor = '#22c55e';
-                this.style.color = 'white';
+                var btn = document.getElementById('btn_{key}');
+                btn.innerText = '✅ Copied!';
+                btn.style.backgroundColor = '#22c55e';
+                btn.style.color = 'white';
+                btn.style.borderColor = '#22c55e';
                 setTimeout(() => {{
-                    this.innerText = '📋 Copy';
-                    this.style.backgroundColor = '';
-                    this.style.color = '';
+                    btn.innerText = '📋 Copy';
+                    btn.style.backgroundColor = '{bg}';
+                    btn.style.color = '{color}';
+                    btn.style.borderColor = '{border}';
                 }}, 2000);
             }});
-        " style="
-            width: 100%;
-            padding: 6px 12px;
-            cursor: pointer;
-            border: 1px solid #d0d0d8;
-            border-radius: 6px;
-            font-size: 14px;
-            background-color: transparent;
-            transition: background-color 0.2s;
         ">📋 Copy</button>
-    """, height=40)
+    """, height=46)
 
 
 def render_error(message: str):
