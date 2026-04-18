@@ -49,6 +49,10 @@ def build_css(p: ColorPalette) -> str:
     return f"""
 <style>
     .stApp                                      {{ background-color: {p.bg} !important; }}
+    .stApp > header,
+    [data-testid="stHeader"],
+    [data-testid="stToolbar"],
+    [data-testid="stDecoration"]                {{ background-color: {p.bg} !important; }}
     [data-testid="stSidebar"],
     [data-testid="stSidebar"] > div             {{ background-color: {p.sidebar_bg} !important; }}
     .block-container                            {{ background-color: {p.bg} !important; }}
